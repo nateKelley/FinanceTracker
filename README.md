@@ -1,3 +1,4 @@
+![Dashboard Screenshot](./dashboard.png)
 # 💰 Personal Finance Tracker
 
 A full-stack web application built with **Flask**, **SQLite**, and **Chart.js** that helps users manage, analyze, and visualize their daily expenses.
