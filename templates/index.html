@@ -1,0 +1,92 @@
+<body>
+  <h1>Welcome to the Personal Finance Tracker</h1>
+  <a href="/add">Add New Expense</a>
+
+  <h2>Recent Expenses</h2>
+  {% if expenses %}
+    <table border="1" align="center" cellpadding="8">
+      <tr>
+        <th>Category</th>
+        <th>Amount</th>
+        <th>Date</th>
+        <th>Actions</th>
+      </tr>
+      {% for e in expenses %}
+      <tr>
+        <td>{{ e[1] }}</td>
+        <td>${{ '%.2f'|format(e[2]) }}</td>
+        <td>{{ e[3] }}</td>
+        <td>
+          <a href="/edit/{{ e[0] }}">Edit</a> |
+          <a href="/delete/{{ e[0] }}" onclick="return confirm('Delete this expense?')">Delete</a>
+        </td>
+      </tr>
+      {% endfor %}
+    </table>
+
+    <h2>Spending Summary</h2>
+
+    <!-- Pie Chart by Category -->
+    <canvas id="categoryChart" width="400" height="200"></canvas>
+    <br>
+
+    <!-- Bar Chart by Date -->
+    <canvas id="dateChart" width="400" height="200"></canvas>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+      // Prepare category totals
+      const data = {{ expenses|tojson }};
+      const categoryTotals = {};
+      const dateTotals = {};
+
+      data.forEach(e => {
+        const category = e[1];
+        const amount = parseFloat(e[2]);
+        const date = e[3];
+
+        categoryTotals[category] = (categoryTotals[category] || 0) + amount;
+        dateTotals[date] = (dateTotals[date] || 0) + amount;
+      });
+
+      const categoryLabels = Object.keys(categoryTotals);
+      const categoryData = Object.values(categoryTotals);
+
+      const dateLabels = Object.keys(dateTotals).sort();
+      const dateData = dateLabels.map(d => dateTotals[d]);
+
+      // Pie Chart
+      new Chart(document.getElementById('categoryChart'), {
+        type: 'pie',
+        data: {
+          labels: categoryLabels,
+          datasets: [{
+            label: 'Spending by Category',
+            data: categoryData,
+            backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF'],
+          }]
+        }
+      });
+
+      // Bar Chart
+      new Chart(document.getElementById('dateChart'), {
+        type: 'bar',
+        data: {
+          labels: dateLabels,
+          datasets: [{
+            label: 'Spending Over Time',
+            data: dateData,
+            backgroundColor: '#36A2EB'
+          }]
+        },
+        options: {
+          scales: {
+            y: { beginAtZero: true }
+          }
+        }
+      });
+    </script>
+  {% else %}
+    <p>No expenses yet.</p>
+  {% endif %}
+</body>
